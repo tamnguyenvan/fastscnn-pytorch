@@ -1,8 +1,10 @@
+import time
 import os
 import argparse
 import torch
 
 from torchvision import transforms
+from torchvision.transforms.transforms import Resize
 from models.fast_scnn import get_fast_scnn
 from PIL import Image
 from utils.visualize import get_color_pallete
@@ -35,6 +37,7 @@ def demo():
 
     # image transform
     transform = transforms.Compose([
+        transforms.Resize((1024//4, 2048//4)),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]),
     ])
@@ -43,12 +46,16 @@ def demo():
     model = get_fast_scnn(args.dataset, pretrained=True, root=args.weights_folder, map_cpu=args.cpu).to(device)
     print('Finished loading model!')
     model.eval()
+    t0 = time.time()
     with torch.no_grad():
         outputs = model(image)
     pred = torch.argmax(outputs[0], 1).squeeze(0).cpu().data.numpy()
+    duration = time.time() - t0
+    print('Time: {:.3f} FPS: {}'.format(duration, int(1 / duration)))
     mask = get_color_pallete(pred, args.dataset)
     outname = os.path.splitext(os.path.split(args.input_pic)[-1])[0] + '.png'
-    mask.save(os.path.join(args.outdir, outname))
+    # mask.save(os.path.join(args.outdir, outname))
+    mask.show()
 
 
 if __name__ == '__main__':
