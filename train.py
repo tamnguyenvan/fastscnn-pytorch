@@ -188,7 +188,7 @@ def save_checkpoint(model, args, is_best=False):
     if is_best:
         best_filename = '{}_{}_best_model.pth'.format(args.model, args.dataset)
         best_filename = os.path.join(directory, best_filename)
-        shutil.copyfile(filename, best_filename)
+        shutil.copyfile(save_path, best_filename)
 
 
 if __name__ == '__main__':
